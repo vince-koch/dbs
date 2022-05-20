@@ -2,7 +2,7 @@ import express from "express";
 import "express-async-errors";
 import { Connection, QueryResult } from "postgresql-client";
 
-async function getConnection(): Promise<Connection> {
+async function openConnection(): Promise<Connection> {
   const connection = new Connection({
     host: "localhost",
     port: 5432,
@@ -14,6 +14,12 @@ async function getConnection(): Promise<Connection> {
   await connection.connect();
 
   return connection;
+}
+
+async function closeConnection(connection: Connection): Promise<void> {
+  if (connection !== null && connection !== undefined) {
+    await connection.close();
+  }
 }
 
 function mapRows(result: QueryResult): {}[] {
@@ -71,22 +77,25 @@ app.get("/api/db/tables", async (req, res) => {
       AND (LENGTH($2) = 0 OR c.table_name = $2)
     ORDER BY t.table_catalog, t.table_schema, t.table_name, c.ordinal_position`.trim();
 
-    const connection = await getConnection();
+    const connection = await openConnection();
 
-    const result = await connection.query(
-      query,
-      {
-        params: [ schema as string, table as string ],
-        fetchCount: 9999
-      });
+    try {
+      const result = await connection.query(
+        query,
+        {
+          params: [ schema as string, table as string ],
+          fetchCount: 9999
+        });
 
-    const mapped = mapRows(result);
+      const mapped = mapRows(result);
 
-    //console.info("query executed", { query, rowCount: result.rows.length, mappedCount: mapped.length });
+      res.json(mapped);
 
-    res.json(mapped);
-
-    console.info("query executed", { query, rowCount: result.rows.length, mappedCount: mapped.length });
+      console.info("query executed", { query, rowCount: result.rows.length, mappedCount: mapped.length });
+    }
+    finally {
+      await closeConnection(connection);
+    }
 })
 
 app.get("/api/db/procedures", async (req, res) => {
@@ -106,18 +115,23 @@ app.get("/api/db/procedures", async (req, res) => {
       AND (LENGTH($2) = 0 OR r.routine_name = $2)
     ORDER BY r.routine_catalog, r.routine_schema, r.routine_name, p.ordinal_position`.trim();
 
-  const connection = await getConnection();
+  const connection = await openConnection();
 
-  const result = await connection.query(
-    query,
-    {
-      params: [ schema as string, procedure as string ],
-      fetchCount: 9999
-    });
+  try {
+    const result = await connection.query(
+      query,
+      {
+        params: [ schema as string, procedure as string ],
+        fetchCount: 9999
+      });
 
-  const mapped = mapRows(result);
+    const mapped = mapRows(result);
 
-  res.json(mapped);
+    res.json(mapped);
+  }
+  finally {
+    await closeConnection(connection);
+  }
 });
 
 app.post("/api/db/execute", async (req, res) => {
@@ -125,10 +139,16 @@ app.post("/api/db/execute", async (req, res) => {
     throw new Error("No query provided");
   }
 
-  const connection = await getConnection();
-  const result = await connection.execute(req.body.query);
-  res.json(result);
-  await connection.close();
+  const connection = await openConnection();
+  
+  try {
+    const result = await connection.execute(req.body.query);
+    res.json(result);
+    await connection.close();
+  }
+  finally {
+    await closeConnection(connection);
+  }
 });
 
 // error handler middleware

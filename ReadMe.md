@@ -18,3 +18,6 @@ repository: https://github.com/caplin/FlexLayout
 #### Postgres Client
 https://www.npmjs.com/package/pg
 https://www.npmjs.com/package/postgresql-client
+
+### Docker
+docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=sergtsop -d postgres
