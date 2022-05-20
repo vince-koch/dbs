@@ -1,0 +1,8 @@
+.tree-node ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.tree-node i.chevron {
+    padding-right: 4px;
+}

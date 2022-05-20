@@ -1,0 +1,54 @@
+.explorer-panel {
+    font-size: calc(12px);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.explorer-panel .catalog {
+    color: greenyellow;
+}
+
+.explorer-panel .schema {
+    color: pink;
+    font-weight: bold;
+}
+
+.explorer-panel .folder {
+    color: yellow;
+}
+
+.explorer-panel .function {
+    color: lightseagreen;
+}
+
+.explorer-panel .procedure {
+    color: lightseagreen;
+}
+
+.explorer-panel .table {
+    color: lightseagreen;
+}
+
+.explorer-panel .view {
+    color: lightseagreen;
+}
+
+.explorer-panel .column {
+    color: lightgray;
+}
+
+.explorer-panel .parameter {
+    color: lightgray;
+}
+
+.explorer-panel .data-type {
+    color: dimgray;
+    float: right;
+}
+
+.explorer-panel .parameter-direction {
+    color: slateblue;
+    float: right;
+    text-align: right;
+    width: 40px;
+}

@@ -1,0 +1,54 @@
+.editor-panel {
+    height: 50%;
+    width: 99%;
+}
+
+.editor-text {
+    font-family: monospace;
+    height: 100%;
+    width: 100%;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    white-space: pre;
+}
+
+.editor-panel table {
+    border: 1px solid gray;
+    border-collapse: collapse;
+    margin: 10px;
+    font-size: calc(10px);
+}
+
+.editor-panel table thead {
+    background-color: gray;
+    font-weight: bold;
+}
+
+.editor-panel table thead td {
+    padding-right: 8px;
+}
+
+.editor-panel table tbody tr {
+    border: solid;
+    border-color: gray;
+    border-width: 1px 0;
+}​
+
+.editor-panel table tbody tr:first-child,
+.editor-panel table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.editor-panel table tfoot {
+    background-color: #353535;
+    font-weight: bold;
+}
+
+.editor-panel table td {
+    vertical-align: top;
+}
+
+.editor-panel .error {
+    color: red;
+}
