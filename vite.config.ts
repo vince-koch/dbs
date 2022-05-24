@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     mix({
-      handler: "./api.ts",
+      handler: "./server/api.ts",
     })
   ]
 })

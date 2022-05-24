@@ -37,6 +37,20 @@
     color: lightgray;
 }
 
+.explorer-panel .column .is-pk {
+    color: yellow;
+    float: right;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.explorer-panel .column .is-fk {
+    color: slateblue;
+    float: right;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
 .explorer-panel .parameter {
     color: lightgray;
 }

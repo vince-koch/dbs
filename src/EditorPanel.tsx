@@ -1,13 +1,11 @@
 import "./EditorPanel.css"
 import React, { useState } from "react";
-//import { CommandResult, ScriptResult } from "postgresql-client";
-import { QueryResult } from "pg";
+import * as Db from "../server/DbAdapter";
 
 export default function EditorPanel() {
     const [ cursorPosition, setCursorPosition ] = useState({ x: 0, y: 0 });
     const [ scriptError, setScriptError ] = useState<string>();
-    //const [ scriptResult, setScriptResult ] = useState<ScriptResult>();
-    const [ scriptResult, setScriptResult ] = useState<QueryResult>();
+    const [ scriptResult, setScriptResult ] = useState<Db.IDbQueryResult[]>();
     
     function getCursorPosition(textarea: HTMLTextAreaElement) {
         const textLines = textarea.value.substring(0, textarea.selectionStart).split("\n");
@@ -76,39 +74,17 @@ export default function EditorPanel() {
         setCursorPosition(position);
     }
 
-    // postgres-client
-    function renderCommandResult(result: CommandResult) {
+    function renderQueryResult(result: Db.IDbQueryResult) {
+        console.info("result ==> ", result);
         return (
             <table>
                 <thead>
                     <tr>
-                        {result.fields.map(field => <td>{field.fieldName}</td>)}
+                        {result.fields.map(field => <th>{field.name}</th>)}
                     </tr>
                 </thead>
                 <tbody>
-                    {result.rows.map(row => <tr>{row.map(cell => <td>{cell}</td>)}</tr>)}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colSpan={result.fields.length}>{result.rowsAffected ?? result.rows?.length} rows affected in {result.executeTime} ms</td>
-                    </tr>
-                </tfoot>
-            </table>
-        );
-    }
-
-    // pg
-    function renderQueryResult(result: QueryResult) {
-        console.info("renderQueryResult: ", result);
-        return (
-            <table>
-                <thead>
-                    <tr>
-                        {result.fields.map(field => <td>{field.name}</td>)}
-                    </tr>
-                </thead>
-                <tbody>
-                    {result.rows.map(row => Object.values(row).map(cell => <td>{cell}</td>))}
+                    {result.rows.map(row => <tr>{Object.values(row).map((cell: any) => <td>{cell}</td>)}</tr>)}
                 </tbody>
                 <tfoot>
                     <tr>

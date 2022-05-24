@@ -5,64 +5,12 @@ import ExplorerPanel from "./ExplorerPanel";
 import EditorPanel from "./EditorPanel";
 import OptionsPanel from "./OptionsPanel";
 import ResultsPanel from "./ResultsPanel";
+import layout from './App.layout.json';
 
 export default function App() {
   const layoutRef = useRef<FlexLayout.Layout>(null);
   const [resultCount, setResultCount] = useState<number>(0);
-  const [layoutModel, setLayoutModel] = useState(FlexLayout.Model.fromJson({
-    global: {},
-    layout: {
-      type: "row",
-      weight: 100,
-      children: [
-        {
-          type: "tabset",
-          weight: 15,
-          children: [
-            {
-              type: "tab",
-              enableClose: false,
-              name: "Explorer",
-              altName: "TreeView",
-              component: "ExplorerPanel",
-              /*icon: "images/folder.svg"*/
-            }
-          ]
-        },
-        {
-          type: "tabset",
-          active: true,
-          weight: 85,
-          children: [
-            {
-              type: "tab",
-              enableClose: false,
-              name: "Editor",
-              altName: "Query",
-              component: "EditorPanel",
-              /*icon: "images/folder.svg"*/
-            }
-          ]
-        }
-      ]
-    },
-    borders: [
-      {
-        type: "border",
-        location: "right",
-        children: [
-          {
-            type: "tab",
-            enableClose: false,
-            name: "Options",
-            altName: "Settings",
-            component: "OptionsPanel",
-            /*icon: "images/settings.svg"*/
-          }
-        ]
-      }
-    ],
-  }))
+  const [layoutModel, setLayoutModel] = useState(FlexLayout.Model.fromJson(layout as any));
 
   const layoutFactory = (node: FlexLayout.TabNode) => {
     var component = node.getComponent();

@@ -1,0 +1,51 @@
+{
+    "global": {},
+    "layout": {
+      "type": "row",
+      "weight": 100,
+      "children": [
+        {
+          "type": "tabset",
+          "weight": 20,
+          "children": [
+            {
+              "type": "tab",
+              "enableClose": false,
+              "name": "Explorer",
+              "altName": "TreeView",
+              "component": "ExplorerPanel"
+            }
+          ]
+        },
+        {
+          "type": "tabset",
+          "active": true,
+          "weight": 85,
+          "children": [
+            {
+              "type": "tab",
+              "enableClose": false,
+              "name": "Editor",
+              "altName": "Query",
+              "component": "EditorPanel"
+            }
+          ]
+        }
+      ]
+    },
+    "borders": [
+      {
+        "type": "border",
+        "location": "right",
+        "children": [
+          {
+            "type": "tab",
+            "enableClose": false,
+            "name": "Options",
+            "altName": "Settings",
+            "component": "OptionsPanel"
+          }
+        ]
+      }
+    ]
+  }

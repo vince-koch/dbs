@@ -36,12 +36,12 @@ export default function ExplorerPanel() {
                 item => item.table_name,
                 item => item.ordinal_position);
 
-        console.info("tables ==> ", tables);
+        //console.info("tables ==> ", tables);
         setTableMetaData(tables);
     }
 
     async function refreshProcedures(schema: string | null, procedure: string | null): Promise<void> {
-        const response = await fetch(`/api/db/procedures?schema=${schema ?? ""}&procedure=${procedure ?? ""}`, {
+        const response = await fetch(`/api/db/routines?schema=${schema ?? ""}&procedure=${procedure ?? ""}`, {
             method: "GET",
             cache: "no-cache",
             headers: {
@@ -66,17 +66,17 @@ export default function ExplorerPanel() {
                 item => item.routine_name,
                 item => item.ordinal_position);
 
-        console.info("procedures ==> ", procedures);
+        //console.info("procedures ==> ", procedures);
         setProcedureMetaData(procedures);
     }
 
     // initialization
-    useEffect(() => {
-        console.info("initialization --------------------------");
-        Promise.all([
-            refreshTables(null, null),
-            refreshProcedures(null, null)]);
-      }, []);
+    // useEffect(() => {
+    //     //console.info("initialization --------------------------");
+    //     Promise.all([
+    //         refreshTables(null, null),
+    //         refreshProcedures(null, null)]);
+    //   }, []);
 
     function renderTree() {
         const catalogs = ArrayUtil.distinct([
@@ -103,26 +103,26 @@ export default function ExplorerPanel() {
         ]);
 
         return (
-            <TreeNode className="catalog"
-            header={<SelectableLabel text={catalog}></SelectableLabel>}>
+            <TreeNode key={catalog} className="catalog"
+                header={<SelectableLabel text={catalog}></SelectableLabel>}>
                 {schemas.map(schema => renderSchema(catalog, schema))}
             </TreeNode>);
     }
 
     function renderSchema(catalog: string, schema: string) {
         return (
-            <TreeNode className="schema"
+            <TreeNode key={schema} className="schema"
                 header={<SelectableLabel text={schema}></SelectableLabel>}>
-                <TreeNode className="folder" header={<span>Functions</span>}>
+                <TreeNode key="functions" className="folder" header={<span>Functions</span>}>
                     {renderFunctions(catalog, schema)}
                 </TreeNode>
-                <TreeNode className="folder" header={<span>Procedures</span>}>
+                <TreeNode key="procedures" className="folder" header={<span>Procedures</span>}>
                     {renderProcedures(catalog, schema)}
                 </TreeNode>
-                <TreeNode className="folder" header={<span>Tables</span>}>
+                <TreeNode key="tables" className="folder" header={<span>Tables</span>}>
                     {renderTables(catalog, schema)}
                 </TreeNode>
-                <TreeNode className="folder" header={<span>Views</span>}>
+                <TreeNode key="views" className="folder" header={<span>Views</span>}>
                     {renderViews(catalog, schema)}
                 </TreeNode>
             </TreeNode>);
@@ -136,7 +136,7 @@ export default function ExplorerPanel() {
             .map(item => item.routine_name));
 
         return functions.map(routineName =>
-            <TreeNode className="schema" isCollapsed={true}
+            <TreeNode key={routineName} className="schema" isCollapsed={true}
                 header={<SelectableLabel text={routineName}></SelectableLabel>}>
                 {renderParameters(catalog, schema, routineName)}
             </TreeNode>);
@@ -150,7 +150,7 @@ export default function ExplorerPanel() {
             .map(item => item.routine_name));
 
         return functions.map(routineName =>
-            <TreeNode className="procedure" isCollapsed={true}
+            <TreeNode key={routineName} className="procedure" isCollapsed={true}
                 header={<SelectableLabel text={routineName}></SelectableLabel>}>
                 {renderParameters(catalog, schema, routineName)}
             </TreeNode>);
@@ -164,7 +164,7 @@ export default function ExplorerPanel() {
             .map(item => item.table_name));
 
         return tables.map(tableName =>
-            <TreeNode className="table" isCollapsed={true}
+            <TreeNode key={tableName} className="table" isCollapsed={true}
                 header={<SelectableLabel text={tableName}></SelectableLabel>}>
                 {renderColumns(catalog, schema, tableName)}
             </TreeNode>);
@@ -178,7 +178,7 @@ export default function ExplorerPanel() {
             .map(item => item.table_name));
 
         return views.map(tableName =>
-            <TreeNode className="table" isCollapsed={true}
+            <TreeNode key={tableName} className="table" isCollapsed={true}
                 header={<SelectableLabel text={tableName}></SelectableLabel>}>
                 {renderColumns(catalog, schema, tableName)}
             </TreeNode>);
@@ -193,12 +193,12 @@ export default function ExplorerPanel() {
             item => item.ordinal_position);
 
         return parameters.map(parameter =>
-            <TreeNode className="parameter" isCollapsed={true}
+            <TreeNode key={parameter.parameter_name} className="parameter" isCollapsed={true}
                 header={
                     <span>
                         <SelectableLabel text={parameter.parameter_name}></SelectableLabel>
-                        <span className="parameter-direction">{parameter.parameter_mode}</span>
                         <span className="data-type">{parameter.data_type}</span>
+                        <span className="parameter-direction">{parameter.parameter_mode}</span>
                     </span>
                 }>
             </TreeNode>);
@@ -213,11 +213,13 @@ export default function ExplorerPanel() {
             item => item.ordinal_position);
 
         return columns.map(column =>
-            <TreeNode className="column" isCollapsed={true}
+            <TreeNode key={column.column_name} className="column" isCollapsed={true}
                 header={
                     <span>
                         <SelectableLabel text={column.column_name}></SelectableLabel>
-                        <span className="data-type">{column.data_type}</span>                    
+                        <span className="data-type">{column.data_type}</span>
+                        {column.is_fk ? <span className="is-fk">FK</span> : null}
+                        {column.is_pk ? <span className="is-pk">PK</span> : null}
                     </span>
                 }>
             </TreeNode>);
