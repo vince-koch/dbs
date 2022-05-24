@@ -1,39 +1,67 @@
 import express from "express";
 import "express-async-errors";
-import { Connection, QueryResult } from "postgresql-client";
+import fs from "fs";
+//import { Connection, QueryResult } from "postgresql-client";
+import { Client, QueryResult } from "pg";
 
-async function openConnection(): Promise<Connection> {
-  const connection = new Connection({
-    host: "localhost",
-    port: 5432,
-    user: "postgres",
-    password: "sergtsop",
-    database: "hris"
-  });
+// async function openConnection(): Promise<Connection> {
+//   const connection = new Connection({
+//     host: "localhost",
+//     port: 5432,
+//     user: "postgres",
+//     password: "sergtsop",
+//     database: "hris"
+//   });
+//
+//   await connection.connect();
+//
+//   return connection;
+// }
+//
+// async function closeConnection(connection: Connection): Promise<void> {
+//   if (connection !== null && connection !== undefined) {
+//     await connection.close();
+//   }
+// }
+//
+// function mapRows(result: QueryResult): {}[] {
+//   const items = result.rows.map(
+//     row => {
+//       let item = {};
+//       for (let f = 0; f < result.fields.length; f++) {
+//         item[result.fields[f].fieldName] = row[f];
+//       }
+//
+//       return item;
+//     });
+//
+//   return items;
+// }
 
-  await connection.connect();
+async function openConnection(): Promise<Client> {
+  const rawData = fs.readFileSync("connection.default.json");
+  const connectionConfig = JSON.parse(rawData);
 
-  return connection;
+  const client = new Client(connectionConfig);
+
+    client.on("error", err => console.error("client error: ", err));
+    client.on("notification", msg => console.info("client notification: ", msg));
+    client.on("notice", msg => console.warn("client notice: ", msg));
+    client.on("end", () => console.warn("client disconnected"));
+
+    await client.connect();
+
+    return client;
 }
 
-async function closeConnection(connection: Connection): Promise<void> {
-  if (connection !== null && connection !== undefined) {
-    await connection.close();
-  }
+async function closeConnection(client: Client): Promise<void> {
+  await client.end();
 }
 
 function mapRows(result: QueryResult): {}[] {
-  const items = result.rows.map(
-    row => {
-      let item = {};
-      for (let f = 0; f < result.fields.length; f++) {
-        item[result.fields[f].fieldName] = row[f];
-      }
-
-      return item;
-    });
-
-  return items;
+  console.clear();
+  console.info("map rows ==> ", result);
+  throw new Error("not implemented");
 }
 
 function getValueOrNull(value: any) {
@@ -80,12 +108,16 @@ app.get("/api/db/tables", async (req, res) => {
     const connection = await openConnection();
 
     try {
-      const result = await connection.query(
-        query,
-        {
-          params: [ schema as string, table as string ],
-          fetchCount: 9999
-        });
+      // const result = await connection.query(
+      //   query,
+      //   {
+      //     params: [ schema as string, table as string ],
+      //     fetchCount: 9999
+      //   });
+      const result = await connection.query({
+        text: query,
+        values: [ schema, table ],
+        rowMode: "array" });
 
       const mapped = mapRows(result);
 
@@ -118,12 +150,16 @@ app.get("/api/db/procedures", async (req, res) => {
   const connection = await openConnection();
 
   try {
-    const result = await connection.query(
-      query,
-      {
-        params: [ schema as string, procedure as string ],
-        fetchCount: 9999
-      });
+    // const result = await connection.query(
+    //   query,
+    //   {
+    //     params: [ schema as string, procedure as string ],
+    //     fetchCount: 9999
+    //   });
+    const result = await connection.query({
+      text: query,
+      values: [ schema, procedure ],
+      rowMode: "array" });
 
     const mapped = mapRows(result);
 
@@ -142,9 +178,14 @@ app.post("/api/db/execute", async (req, res) => {
   const connection = await openConnection();
   
   try {
-    const result = await connection.execute(req.body.query);
+    const query = req.body.query as string;
+
+    const result = await connection.query({
+      //rowMode: "array",
+      text: query });
+
+    console.info("EXECUTE =========", { query, result, rows: result.rows });
     res.json(result);
-    await connection.close();
   }
   finally {
     await closeConnection(connection);

@@ -1,12 +1,14 @@
 import "./EditorPanel.css"
 import React, { useState } from "react";
-import { CommandResult, ScriptResult } from "postgresql-client";
+//import { CommandResult, ScriptResult } from "postgresql-client";
+import { QueryResult } from "pg";
 
 export default function EditorPanel() {
     const [ cursorPosition, setCursorPosition ] = useState({ x: 0, y: 0 });
     const [ scriptError, setScriptError ] = useState<string>();
-    const [ scriptResult, setScriptResult ] = useState<ScriptResult>();
-
+    //const [ scriptResult, setScriptResult ] = useState<ScriptResult>();
+    const [ scriptResult, setScriptResult ] = useState<QueryResult>();
+    
     function getCursorPosition(textarea: HTMLTextAreaElement) {
         const textLines = textarea.value.substring(0, textarea.selectionStart).split("\n");
         const y = textLines.length;
@@ -56,7 +58,6 @@ export default function EditorPanel() {
                 : target.value;
 
             // todo: execute the query and add a tab for the results
-            console.info("selected text = ", { start, end, text: selectedText });
             if (selectedText.length > 0) {
                 onExecute(selectedText);
             }
@@ -75,6 +76,7 @@ export default function EditorPanel() {
         setCursorPosition(position);
     }
 
+    // postgres-client
     function renderCommandResult(result: CommandResult) {
         return (
             <table>
@@ -88,7 +90,29 @@ export default function EditorPanel() {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan={result.rows.length}>{result.rowsAffected ?? result.rows?.length} rows affected in {result.executeTime} ms</td>
+                        <td colSpan={result.fields.length}>{result.rowsAffected ?? result.rows?.length} rows affected in {result.executeTime} ms</td>
+                    </tr>
+                </tfoot>
+            </table>
+        );
+    }
+
+    // pg
+    function renderQueryResult(result: QueryResult) {
+        console.info("renderQueryResult: ", result);
+        return (
+            <table>
+                <thead>
+                    <tr>
+                        {result.fields.map(field => <td>{field.name}</td>)}
+                    </tr>
+                </thead>
+                <tbody>
+                    {result.rows.map(row => Object.values(row).map(cell => <td>{cell}</td>))}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colSpan={result.fields.length}>{result.rowCount ?? result.rows?.length} rows affected</td>
                     </tr>
                 </tfoot>
             </table>
@@ -100,7 +124,13 @@ export default function EditorPanel() {
             return null;
         }
 
-        return scriptResult.results.map(result => renderCommandResult(result));
+        if (Array.isArray(scriptResult)) {
+            return scriptResult.map(result => renderQueryResult(result));
+        }
+        else {
+            return renderQueryResult(scriptResult);    
+        }
+
     }
 
     function renderScriptError() {
