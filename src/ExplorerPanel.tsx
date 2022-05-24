@@ -71,12 +71,12 @@ export default function ExplorerPanel() {
     }
 
     // initialization
-    // useEffect(() => {
-    //     //console.info("initialization --------------------------");
-    //     Promise.all([
-    //         refreshTables(null, null),
-    //         refreshProcedures(null, null)]);
-    //   }, []);
+    useEffect(() => {
+        //console.info("initialization --------------------------");
+        Promise.all([
+            refreshTables(null, null),
+            refreshProcedures(null, null)]);
+      }, []);
 
     function renderTree() {
         const catalogs = ArrayUtil.distinct([
