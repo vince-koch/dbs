@@ -22,7 +22,7 @@ export class PostgresPgDb implements Db.IDbClient {
         this._client.on("error", err => console.error("client error: ", err));
         this._client.on("notification", msg => console.info("client notification: ", msg));
         this._client.on("notice", msg => console.warn("client notice: ", msg));
-        this._client.on("end", () => console.warn("client disconnected"));
+        //this._client.on("end", () => console.warn("client disconnected"));
 
         await this._client.connect();
     }

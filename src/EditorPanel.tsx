@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import * as Db from "../server/DbAdapter";
 
 export default function EditorPanel() {
-    const [ cursorPosition, setCursorPosition ] = useState({ x: 0, y: 0 });
+    const [ cursorPosition, setCursorPosition ] = useState({ x: 1, y: 1 });
     const [ scriptError, setScriptError ] = useState<string>();
     const [ scriptResult, setScriptResult ] = useState<Db.IDbQueryResult[]>();
     
@@ -43,7 +43,7 @@ export default function EditorPanel() {
         }
     }
 
-    function onKeyDown(e: React.KeyboardEvent) {
+    function onKeyDown(e: React.KeyboardEvent): void {
         const target = e.target as HTMLTextAreaElement;
 
         if (e.key === "F5") {
@@ -60,6 +60,38 @@ export default function EditorPanel() {
                 onExecute(selectedText);
             }
         }
+
+        if (e.key === "Tab") {
+            e.preventDefault();
+
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            const selected = target.value.substring(start, end);
+
+            const modified = e.shiftKey
+                ? selected.split("\n").map(line => unindentLine(line)).join("\n")  //  unindent
+                : selected.split("\n").map(line => indentLine(line)).join("\n"); // indent
+        
+            // set textarea value to: text before caret + tab + text after caret
+            target.value = target.value.substring(0, start)
+                + modified
+                + target.value.substring(end);
+        
+            // put caret at right position again
+            //target.selectionStart = target.selectionEnd = start + 1;
+        }
+    }
+
+    function unindentLine(line: string): string {
+        const result = line.startsWith("\t")
+            ? line.substring(1)
+            : line.substring(Math.min(line.length - line.trimStart().length, 4));
+        
+        return result;
+    }
+
+    function indentLine(line: string): string {
+        return "\t" + line;
     }
 
     function onKeyUp(e: React.KeyboardEvent) {

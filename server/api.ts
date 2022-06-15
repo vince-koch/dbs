@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import "express-async-errors";
 import { registerDbApiRoutes } from "./DbApi";
@@ -11,7 +12,7 @@ registerDbApiRoutes(app);
 // error handler middleware
 app.use((err, req, res, next) => {
     if (err !== null) {
-        console.error(err);
+        console.error("Unahandled exception caught in api.ts >>> ", err)
 
         if (err.message === 'access denied') {
             res.status(403)
@@ -22,6 +23,7 @@ app.use((err, req, res, next) => {
             res.status(500)
             res.json({ error: err.message })
             res.end()
+            return
         }
     }
 
