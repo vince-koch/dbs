@@ -3,6 +3,7 @@ import * as Db from "./DbAdapter";
 
 export class PostgresPgDb implements Db.IDbClient {
     private _client: Pg.Client;
+    private _messages: string[] = [];
 
     public async connect(options: Db.IDbClientOptions): Promise<void> {
         if (this._client) {
@@ -19,12 +20,19 @@ export class PostgresPgDb implements Db.IDbClient {
         } as Pg.ClientConfig;
 
         this._client = new Pg.Client(config);
+        await this._client.connect();
+
+        this._client.on("notice", msg =>
+        {
+            if (msg.message !== undefined) {
+                this._messages.push(msg.message);
+                console.info(msg.message);
+            }
+        });
+
         this._client.on("error", err => console.error("client error: ", err));
         this._client.on("notification", msg => console.info("client notification: ", msg));
-        this._client.on("notice", msg => console.warn("client notice: ", msg));
         //this._client.on("end", () => console.warn("client disconnected"));
-
-        await this._client.connect();
     }
 
     public async execute(options: Db.IDbQueryOptions): Promise<Db.IDbQueryResult[]> {
@@ -33,9 +41,25 @@ export class PostgresPgDb implements Db.IDbClient {
             ... (options.values && { values: options.values })
         } as Pg.QueryConfig;
 
+        this._messages = [];
         const result = await this._client.query(config);
         const array = Array.isArray(result) ? result : [ result ];
         const mapped = array.map(item => this.mapResult(item));
+
+        // if we have messages, make them the first result
+        if (this._messages.length > 0) {
+            const field = { name: "message" } as Db.IDbField;
+            const rows = this._messages.map(item => new Object({ message: item }));
+            const messages = {
+                fields: [ field ],
+                rows: rows,
+                rowCount: this._messages.length
+            } as Db.IDbQueryResult;
+
+            mapped.unshift(messages);
+
+            this._messages = [];
+        }
 
         return mapped;;
     }

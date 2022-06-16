@@ -6,7 +6,7 @@ export default function EditorPanel() {
     const [ cursorPosition, setCursorPosition ] = useState({ x: 1, y: 1 });
     const [ scriptError, setScriptError ] = useState<string>();
     const [ scriptResult, setScriptResult ] = useState<Db.IDbQueryResult[]>();
-    
+
     function getCursorPosition(textarea: HTMLTextAreaElement) {
         const textLines = textarea.value.substring(0, textarea.selectionStart).split("\n");
         const y = textLines.length;
@@ -71,12 +71,12 @@ export default function EditorPanel() {
             const modified = e.shiftKey
                 ? selected.split("\n").map(line => unindentLine(line)).join("\n")  //  unindent
                 : selected.split("\n").map(line => indentLine(line)).join("\n"); // indent
-        
+
             // set textarea value to: text before caret + tab + text after caret
             target.value = target.value.substring(0, start)
                 + modified
                 + target.value.substring(end);
-        
+
             // put caret at right position again
             //target.selectionStart = target.selectionEnd = start + 1;
         }
@@ -86,7 +86,7 @@ export default function EditorPanel() {
         const result = line.startsWith("\t")
             ? line.substring(1)
             : line.substring(Math.min(line.length - line.trimStart().length, 4));
-        
+
         return result;
     }
 
@@ -136,7 +136,7 @@ export default function EditorPanel() {
             return scriptResult.map(result => renderQueryResult(result));
         }
         else {
-            return renderQueryResult(scriptResult);    
+            return renderQueryResult(scriptResult);
         }
 
     }
@@ -151,10 +151,10 @@ export default function EditorPanel() {
 
     return (
         <div className="editor-panel">
-            <div className="editor-footer">
+            <textarea className="editor-text" onKeyDown={e => onKeyDown(e)} onKeyUp={e => onKeyUp(e)}></textarea>
+            <div className="editor-status">
                 {cursorPosition.x}, {cursorPosition.y}
             </div>
-            <textarea className="editor-text" onKeyDown={e => onKeyDown(e)} onKeyUp={e => onKeyUp(e)}></textarea>
             {renderScriptError()}
             {renderScriptResult()}
         </div>

@@ -54,8 +54,8 @@ export class DbController {
 
     @http.get("routines/:schema?.:routine?")
     public async getRoutines(
-        @http.fromQuery("schema", v => v) schema: string,
-        @http.fromQuery("routine", v => v) routine: string): Promise<Db.IDbRoutineMeta[]>
+        @http.fromQuery("schema") schema: string,
+        @http.fromQuery("routine") routine: string): Promise<Db.IDbRoutineMeta[]>
     {
         const connection = await openConnection();
 
@@ -69,7 +69,7 @@ export class DbController {
     }
 
     @http.post("execute")
-    public async execute(@http.fromBody(v => v) query: string): Promise<Db.IDbQueryResult[]>
+    public async execute(@http.fromBody("query") query: string): Promise<Db.IDbQueryResult[]>
     {
         if (Utilities.string.isNullOrWhiteSpace(query)) {
             throw new Error("No query provided");

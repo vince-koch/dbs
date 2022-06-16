@@ -18,7 +18,7 @@ type HttpParamInfo = {
     parameterIndex: number,
     from: "query" | "body",
     parameterName: string | null,
-    converter: (value: string) => any
+    converter: ((value: string | any) => any) | null
 }
 
 export class http {
@@ -42,7 +42,10 @@ export class http {
         };
     }
 
-    public static fromQuery<T>(parameterName: string, converter: (value: string) => any): ParameterDecorator {
+    public static fromQuery<T>(
+        parameterName: string,
+        converter: ((value: string) => any) | null = null): ParameterDecorator
+    {
         if (converter == null || converter == undefined) {
             converter = (value: string) => value;
         }
@@ -56,7 +59,10 @@ export class http {
         };
     }
 
-    public static fromBody<T>(converter: (value: string) => any):  ParameterDecorator {
+    public static fromBody<T>(
+        parameterName: string | null = null,
+        converter: ((value: any) => any) | null = null):  ParameterDecorator
+    {
         if (converter == null || converter == undefined) {
             converter = (value: string) => value;
         }
@@ -65,7 +71,7 @@ export class http {
             Reflect.defineMetadata("controller:from", "body", target, parameterKey);
 
             const paramInfo = Reflect.getMetadata("controller:param", target, parameterKey) as HttpParamInfo[] ?? [];
-            paramInfo.push({ "parameterName": null, parameterIndex, from: "body", converter });
+            paramInfo.push({ "parameterName": parameterName, parameterIndex, from: "body", converter });
             Reflect.defineMetadata("controller:param", paramInfo, target, parameterKey);
         };
     }
@@ -102,7 +108,10 @@ export class ExpressApi {
                         args[parameterInfo.parameterIndex] = converted;
                     }
                     else if (parameterInfo.from == "body") {
-                        const value = req.params[parameterInfo.parameterName] ?? req.query[parameterInfo.parameterName];
+                        const value = parameterInfo.parameterName != null
+                            ? req.body[parameterInfo.parameterName]
+                            : req.body;
+
                         const converted = parameterInfo.converter(value);
                         args[parameterInfo.parameterIndex] = converted;
                     }

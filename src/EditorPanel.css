@@ -3,6 +3,11 @@
     width: 99%;
 }
 
+.editor-status {
+    font-size: small;
+    text-align: right;
+}
+
 .editor-text {
     font-family: monospace;
     height: 100%;
@@ -54,4 +59,5 @@
 
 .editor-panel .error {
     color: red;
+    font-size: small;
 }
