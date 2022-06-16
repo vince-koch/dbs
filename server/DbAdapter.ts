@@ -11,7 +11,7 @@ export interface IDbTableMeta {
     numeric_precision: number;
     is_nullable: boolean;
     is_pk: boolean;
-    is_fk: boolean;    
+    is_fk: boolean;
 }
 
 export interface IDbRoutineMeta {

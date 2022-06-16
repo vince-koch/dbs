@@ -1,13 +1,15 @@
-import path from "path";
 import express from "express";
 import "express-async-errors";
-import { registerDbApiRoutes } from "./DbApi";
+import { ExpressApi } from "./ExpressApi";
+import { CalculatorController } from "./CalculatorController";
+import { DbController } from "./DbController";
 
 const app = express();
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded()); // to support URL-encoded bodies
 
-registerDbApiRoutes(app);
+ExpressApi.registerEndpoints(app, new DbController(), "api");
+ExpressApi.registerEndpoints(app, new CalculatorController(), "api");
 
 // error handler middleware
 app.use((err, req, res, next) => {

@@ -40,7 +40,7 @@ export class PostgresPgDb implements Db.IDbClient {
         return mapped;;
     }
 
-    public async getTableMeta(schemaName: string = null, tableName: string = null): Promise<Db.IDbTableMeta[]> {
+    public async getTableMeta(schemaName: string | null = null, tableName: string | null = null): Promise<Db.IDbTableMeta[]> {
         const query = `
                 WITH key_constraints AS (
                     SELECT kcu.constraint_catalog, kcu.constraint_schema, kcu.constraint_name, kcu.table_catalog, kcu.table_schema, kcu.table_name, kcu.column_name, kcu.ordinal_position,
@@ -82,18 +82,18 @@ export class PostgresPgDb implements Db.IDbClient {
                     AND (LENGTH($2) = 0 OR c.table_name = $2)
                 ORDER BY t.table_catalog, t.table_schema, t.table_name, c.ordinal_position
             `.trim();
-        
+
         const config = {
             text: query,
-            values: [ schemaName, tableName ],
+            values: [ schemaName ?? "", tableName ?? "" ],
         } as Pg.QueryConfig;
-        
+
         const result = await this._client.query<Db.IDbTableMeta>(config);
 
         return result.rows;
     }
 
-    public async getRoutineMeta(schemaName: string = null, routineName: string = null): Promise<Db.IDbRoutineMeta[]> {
+    public async getRoutineMeta(schemaName: string | null = null, routineName: string | null = null): Promise<Db.IDbRoutineMeta[]> {
         const query = `
             SELECT r.routine_type, r.routine_catalog, r.routine_schema, r.routine_name, r.data_type as return_data_type,
                 p.parameter_name, p.ordinal_position, p.parameter_mode, p.is_result, p.data_type, p.character_maximum_length, p.parameter_default
@@ -109,7 +109,7 @@ export class PostgresPgDb implements Db.IDbClient {
 
         const config = {
             text: query,
-            values: [ schemaName, routineName ],
+            values: [ schemaName ?? "", routineName ?? "" ],
         } as Pg.QueryConfig;
 
         const result = await this._client.query<Db.IDbRoutineMeta>(config);
