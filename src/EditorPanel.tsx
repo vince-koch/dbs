@@ -1,9 +1,12 @@
 import "./EditorPanel.css"
+import "./Loader.css"
 import React, { useState } from "react";
 import * as Db from "../server/DbAdapter";
+import { indent, unindent } from "indent-textarea";
 
 export default function EditorPanel() {
     const [ cursorPosition, setCursorPosition ] = useState({ x: 1, y: 1 });
+    const [ isBusy, setIsBusy ] = useState<boolean>(false);
     const [ scriptError, setScriptError ] = useState<string>();
     const [ scriptResult, setScriptResult ] = useState<Db.IDbQueryResult[]>();
 
@@ -16,8 +19,9 @@ export default function EditorPanel() {
         return position;
     }
 
-    async function onExecute(query: string) {
+    async function onExecute(query: string): Promise<void> {
         try {
+            setIsBusy(true);
             setScriptError(undefined);
             setScriptResult(undefined);
 
@@ -41,6 +45,9 @@ export default function EditorPanel() {
         catch (thrown) {
             console.error("error caught while doing postgres stuff", thrown);
         }
+        finally {
+            setIsBusy(false);
+        }
     }
 
     function onKeyDown(e: React.KeyboardEvent): void {
@@ -63,35 +70,13 @@ export default function EditorPanel() {
 
         if (e.key === "Tab") {
             e.preventDefault();
-
-            const start = target.selectionStart;
-            const end = target.selectionEnd;
-            const selected = target.value.substring(start, end);
-
-            const modified = e.shiftKey
-                ? selected.split("\n").map(line => unindentLine(line)).join("\n")  //  unindent
-                : selected.split("\n").map(line => indentLine(line)).join("\n"); // indent
-
-            // set textarea value to: text before caret + tab + text after caret
-            target.value = target.value.substring(0, start)
-                + modified
-                + target.value.substring(end);
-
-            // put caret at right position again
-            //target.selectionStart = target.selectionEnd = start + 1;
+            if (!e.shiftKey) {
+                indent(target);
+            }
+            else {
+                unindent(target);
+            }
         }
-    }
-
-    function unindentLine(line: string): string {
-        const result = line.startsWith("\t")
-            ? line.substring(1)
-            : line.substring(Math.min(line.length - line.trimStart().length, 4));
-
-        return result;
-    }
-
-    function indentLine(line: string): string {
-        return "\t" + line;
     }
 
     function onKeyUp(e: React.KeyboardEvent) {
@@ -151,9 +136,10 @@ export default function EditorPanel() {
 
     return (
         <div className="editor-panel">
-            <textarea className="editor-text" onKeyDown={e => onKeyDown(e)} onKeyUp={e => onKeyUp(e)}></textarea>
+            <textarea className="editor-text" onKeyDown={e => onKeyDown(e)} onKeyUp={e => onKeyUp(e)} spellCheck={false}></textarea>
             <div className="editor-status">
-                {cursorPosition.x}, {cursorPosition.y}
+                {isBusy ? <i className="loader --4" style={{ width: "10px" }}></i> : null }
+                <span>Ln {cursorPosition.y}, Col {cursorPosition.x}</span>
             </div>
             {renderScriptError()}
             {renderScriptResult()}

@@ -1,32 +1,82 @@
+:root {
+    --editor-background-color: #202020;
+    --editor-color: gray;
+    --result-background-color: #151515;
+    --result-border-color: #333333;
+    --result-color: gray;
+    --result-header-background-color: #0080ff;
+    --result-header-color: white;
+    --result-footer-background-color: gray;
+    --result-footer-color: white;
+
+    --scrollbar-background-color: #454545;
+    --scrollbar-color: gray;
+
+    --focus-color: #0080ff;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) var(--scrollbar-background-color);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+    width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--scrollbar-background-color);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-color);
+    border-radius: 20px;
+    border: 3px solid var(--scrollbar-background-color);
+}
+
 .editor-panel {
     height: 50%;
     width: 99%;
 }
 
 .editor-status {
+    color: gray;
     font-size: small;
     text-align: right;
 }
 
 .editor-text {
+    background-color: var(--editor-background-color);
+    color: var(--editor-color);
     font-family: monospace;
     height: 100%;
-    width: 100%;
     overflow-wrap: normal;
     overflow-x: scroll;
     overflow-y: scroll;
+    resize: vertical;
     white-space: pre;
+    width: 100%;
+}
+
+.editor-text:focus {
+    outline: none !important;
+    border:1px solid var(--focus-color);
+    box-shadow: 0 0 10px var(--focus-color);
 }
 
 .editor-panel table {
-    border: 1px solid gray;
+    border: 1px solid var(--result-border-color);
     border-collapse: collapse;
+    background-color: var(--result-background-color);
+    color: var(--result-color);
     margin: 10px;
     font-size: calc(10px);
 }
 
 .editor-panel table thead {
-    background-color: gray;
+    background-color: var(--result-header-background-color);
+    color: var(--result-header-color);
     font-weight: bold;
 }
 
@@ -38,9 +88,7 @@
 }
 
 .editor-panel table tbody tr {
-    border: solid;
-    border-color: gray;
-    border-width: 1px 0;
+    border: 1px solid var(--result-border-color);
 }​
 
 .editor-panel table tbody tr:first-child,
@@ -49,7 +97,8 @@
 }
 
 .editor-panel table tfoot {
-    background-color: #353535;
+    background-color: var(--result-footer-background-color);
+    color: var(--result-footer-color);
     font-weight: bold;
 }
 
